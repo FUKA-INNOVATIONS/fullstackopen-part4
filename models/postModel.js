@@ -14,7 +14,11 @@ const postSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  likes: Number
+  likes: {
+    type: Number,
+    required: true,
+    default: 0
+  }
 })
 
 postSchema.set('toJSON', {

@@ -1,61 +1,52 @@
 const postsRouter = require('express').Router()
 const Post = require('../models/postModel')
 
-postsRouter.get('/', (request, response) => {
-  Post.find({}).then(posts => {
-    response.json(posts.map(post => post.toJSON()))
-  })
+postsRouter.get('/', async (request, response) => {
+  const posts = await Post.find({})
+  response.json(posts.map(post => post.toJSON()))
 })
 
-postsRouter.get('/:id', (request, response, next) => {
-  Post.findById(request.params.id)
-  .then(post => {
+postsRouter.get('/:id', async (request, response) => {
+    const post = await Post.findById(request.params.id)
     if (post) {
       response.json(post.toJSON())
     } else {
       response.status(404).end()
     }
-  })
-  .catch(error => next(error))
 })
 
-postsRouter.post('/', (request, response, next) => {
+postsRouter.post('/', async (request, response) => {
   const body = request.body
 
   const post = new Post({
     title: body.title,
     author: body.author,
-    url: body.url
+    url: body.url,
+    likes: body.likes || 0
   })
 
-  post.save()
-  .then(savedPost => {
-    response.json(savedPost.toJSON())
-  })
-  .catch(error => next(error))
+  const savedpost = await post.save()
+  response.json(savedpost.toJSON())
+
 })
 
-postsRouter.delete('/:id', (request, response, next) => {
-  Post.findByIdAndRemove(request.params.id)
-  .then(() => {
+postsRouter.delete('/:id', async (request, response) => {
+    await Post.findByIdAndRemove(request.params.id)
     response.status(204).end()
-  })
-  .catch(error => next(error))
 })
 
-postsRouter.put('/:id', (request, response, next) => {
+postsRouter.put('/:id', async (request, response) => {
   const body = request.body
 
   const post = {
-    content: body.content,
-    important: body.important,
+    title: body.title,
+    author: body.author,
+    url: body.url
   }
 
-  Post.findByIdAndUpdate(request.params.id, note, { new: true })
-  .then(updatedNote => {
-    response.json(updatedNote.toJSON())
-  })
-  .catch(error => next(error))
+  const updatedPost = await Post.findByIdAndUpdate(request.params.id, post, { new: true })
+  response.json(updatedPost.toJSON())
+
 })
 
 module.exports = postsRouter
