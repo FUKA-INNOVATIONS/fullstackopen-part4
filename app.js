@@ -27,9 +27,4 @@ app.use('/api/posts', postsRouter)
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 
-
-/*app.listen(config.PORT, () => {
-  logger.info(`Server running on port ${config.PORT}`)
-})*/
-
 module.exports = app
