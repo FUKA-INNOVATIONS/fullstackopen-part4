@@ -59,6 +59,31 @@ test('a valid post can be added ', async () => {
   )
 })
 
+test('a post can be updated', async () => {
+
+  const posts = await helper.postsInDb()
+  const postToUpdate = posts[0]
+  const postToUpdateId = postToUpdate.id
+
+  const upatedTitle = 'Testing is fun and powerful'
+  const updatedLikes = postToUpdate.likes += 1
+
+  const updatedObject = {
+    title: upatedTitle,
+    likes: updatedLikes
+  }
+
+  api.put(`api/posts/${postToUpdateId}`)
+  .send(updatedObject)
+  .expect(200)
+  .expect(res => {
+    expect(res.body.id).toBe(postToUpdateId)
+    expect(res.body.title).toBe(upatedTitle)
+    expect(res.body.likes).toBe(updatedLikes)
+  })
+
+})
+
 test('default value of likes is set to zero', async () => {
   const newPost = {
     title: 'Dream big, achieve bigger',
@@ -130,6 +155,7 @@ test('the first post title is correct', async () => {
   const response = await api.get('/api/posts')
   expect(response.body[0].title).toBe(helper.initialPosts[0].title)
 })
+
 
 /*test('there are six posts', async () => {
   const response = await api.get('/api/posts')

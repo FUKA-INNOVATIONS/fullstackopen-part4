@@ -41,7 +41,8 @@ postsRouter.put('/:id', async (request, response) => {
   const post = {
     title: body.title,
     author: body.author,
-    url: body.url
+    url: body.url,
+    likes: body.likes
   }
 
   const updatedPost = await Post.findByIdAndUpdate(request.params.id, post, { new: true })
