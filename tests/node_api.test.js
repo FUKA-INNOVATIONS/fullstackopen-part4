@@ -37,15 +37,31 @@ test('a specific post is within the returned posts', async () => {
   )
 })
 
-test('a valid post can be added ', async () => {
+
+test('user can be logged in and a valid post can be added ', async () => {
   const newPost = {
     title: 'Dream big, achieve bigger',
     author: 'Fuad Kalhori',
     url: 'fuka-innovations.io'
   }
 
+  let token = ''
+
+  // Login
+  api.post('/api/login')
+  .send({username: 'root', password: 'salasana'})
+  .expect(200)
+  .expect(res => {
+    console.log('res in login: ', res);
+    token = res.token
+  })
+
+  console.log('token: ', token);
+
+
   await api
   .post('/api/posts')
+  .set('Authentication', `Bearer ${token}`)
   .send(newPost)
   .expect(200)
   .expect('Content-Type', /application\/json/)

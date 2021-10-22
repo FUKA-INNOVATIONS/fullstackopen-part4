@@ -1,4 +1,35 @@
 const logger = require('./logger')
+const User = require('../models/userModel')
+const jwt = require('jsonwebtoken')
+
+const getTokenFrom = (request, response, next) => {
+  //console.log('getTokenFrom MW called')
+  const authorization = request.get('authorization')
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    request.token = authorization.substring(7)
+  }
+  next()
+}
+
+const userExtractor = async (request, response, next) => {
+  //console.log('userExtractor MW called')
+  if (request.token) {
+    const decodedToken = jwt.verify(request.token, process.env.SECRET)
+    if (request.token &&  decodedToken.id) {
+      const user = await User.findById(decodedToken.id)
+      //console.log('fetched user inuserExtractor MW: ', user);
+      const userObject = {
+        _id: user._id,
+        id: user._id.toString(),
+        username: user.username
+      }
+      request.user = userObject
+    }
+  }
+
+  next()
+}
+
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method)
@@ -19,6 +50,15 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
+  } else if (error.name === 'JsonWebTokenError') {
+    //console.log('req.user in errorHandler MW > JsonWebTokenError : ', request.user)
+    return response.status(401).json({
+      error: 'invalid token'
+    })
+  } else if (error.name === 'TokenExpiredError') {
+    return response.status(401).json({
+      error: 'token expired'
+    })
   }
 
   next(error)
@@ -27,5 +67,7 @@ const errorHandler = (error, request, response, next) => {
 module.exports = {
   requestLogger,
   unknownEndpoint,
-  errorHandler
+  errorHandler,
+  getTokenFrom,
+  userExtractor,
 }

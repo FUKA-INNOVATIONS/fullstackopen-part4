@@ -1,5 +1,5 @@
 const mongoose = require( 'mongoose' )
-//const uniqueValidator = require('mongoose-unique-validator')
+const uniqueValidator = require('mongoose-unique-validator')
 
 const postSchema = mongoose.Schema({
   title: {
@@ -18,6 +18,10 @@ const postSchema = mongoose.Schema({
     type: Number,
     required: true,
     default: 0
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   }
 })
 
@@ -29,5 +33,5 @@ postSchema.set('toJSON', {
   }
 })
 
-//postSchema.plugin(uniqueValidator)
+postSchema.plugin(uniqueValidator)
 module.exports = mongoose.model( 'Post', postSchema )
